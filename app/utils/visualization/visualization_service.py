@@ -127,8 +127,30 @@ class VisualizationService:
 
     @staticmethod
     def _create_analysis_summary_table(days, end_price, annual_return, 
-                                     daily_volatility, annualized_volatility, r2, regression_formula):
-        """Create the analysis summary table"""
+                                    daily_volatility, annualized_volatility, r2, regression_formula):
+        """Create the analysis summary table with colored regression formula"""
+        # Look for the first number after the equals sign
+        try:
+            # Split by equals and get the right side
+            equation_parts = regression_formula.split('=')
+            if len(equation_parts) > 1:
+                right_side = equation_parts[1].strip()
+                # Find the first number with its sign
+                import re
+                # This regex looks for a number that may have a negative sign
+                match = re.search(r'[-+]?\d*\.?\d+', right_side)
+                if match:
+                    first_number = match.group()
+                    formula_color = 'red' if first_number.startswith('-') else 'green'
+                else:
+                    formula_color = 'green'  # default if no number found
+            else:
+                formula_color = 'green'  # default if no equals sign
+        except:
+            formula_color = 'green'  # default if any error occurs
+            
+        colored_formula = f'<span style="color: {formula_color}">{regression_formula}</span>'
+        
         return go.Table(
             domain=dict(
                 x=LAYOUT_CONFIG['tables']['analysis_summary']['x'],
@@ -140,22 +162,19 @@ class VisualizationService:
             ),
             cells=dict(
                 values=[
-                    [ 'Regression Formula','Regression R²', 'Current Price', 'Annualized Return', 
-                      'Annual Volatility' ],
+                    ['Regression Formula', 'Regression R²', 'Current Price', 'Annualized Return', 
+                    'Annual Volatility'],
                     [
-                        f"{regression_formula}",
+                        colored_formula,
                         f"{r2:.4f}",
                         f"${end_price:.2f}",
                         f"{annual_return:.2f}%",
                         f"{annualized_volatility:.3f}"
-                       
-                        
                     ]
                 ],
                 **TABLE_STYLE['cells']
             )
         )
-
     @staticmethod
     def _create_trading_signal_table(signal_returns):
         """Create the trading signal analysis table"""

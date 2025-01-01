@@ -217,6 +217,7 @@ class DataService:
         """
         cleaned_ticker = self.clean_ticker_for_table_name(ticker)
         table_name = f"roic_{cleaned_ticker}"
+        MAX_MISSING_YEARS_TOLERANCE = 2 
         
         try:
             # First try to get data from database
@@ -237,7 +238,8 @@ class DataService:
                     actual_years = set(filtered_df['fiscal_year'].values)
                     missing_years = requested_years - actual_years
                     
-                    if len(missing_years) == 0:
+                    # if len(missing_years) == 0:
+                    if len(missing_years) <= MAX_MISSING_YEARS_TOLERANCE:
                         return pd.Series(
                             filtered_df[metric_field].values,
                             index=filtered_df['fiscal_year'],
@@ -311,6 +313,7 @@ class DataService:
 
     def store_financial_data(self, ticker: str, start_year: str = None, end_year: str = None) -> bool:
         """Fetch and store financial data from ROIC API"""
+       
         try:
             print(f"Fetching financial data for {ticker} from ROIC API")
             

@@ -140,6 +140,9 @@ def search_ticker():
             elif (variant.startswith('00') or 
                   variant.startswith('0')) and len(variant) == 4:
                 exchange_suffix = '.HK'
+            # Hong Kong Exchange (.HK)
+            elif len(variant) == 4 and variant.isdigit():
+                exchange_suffix = '.HK'
 
             # Check with exchange suffix if applicable
             if exchange_suffix:
